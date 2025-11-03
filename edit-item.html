@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование объявления - Каталог запчастей</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .edit-header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .edit-form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .current-image-section {
+            margin-bottom: 20px;
+        }
+
+        .current-image-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .current-image-preview {
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-image-text {
+            color: #999;
+            font-style: italic;
+        }
+
+        .change-image-checkbox {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .change-image-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .change-image-checkbox label {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .image-upload-section {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .edit-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-container">
+        <!-- Шапка -->
+        <div class="edit-header">
+            <h1>✏️ Редактирование объявления</h1>
+            <button class="btn-back" onclick="goBack()">← Отмена</button>
+        </div>
+
+        <!-- Форма редактирования -->
+        <div class="edit-form-section">
+            <h2 class="section-title">Изменить данные</h2>
+
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="editForm" onsubmit="handleSubmit(event)">
+                <!-- Категория техники -->
+                <div class="form-group">
+                    <label for="itemApplianceType">Категория техники: <span style="color: red;">*</span></label>
+                    <select id="itemApplianceType" required>
+                        <option value="">Выберите категорию техники</option>
+                        <option value="варочные панели">Варочные панели</option>
+                        <option value="духовые шкафы">Духовые шкафы</option>
+                        <option value="кофемашины">Кофемашины</option>
+                        <option value="кондиционеры">Кондиционеры</option>
+                        <option value="посудомоечная машина">Посудомоечная машина</option>
+                        <option value="стиральные машины">Стиральные машины</option>
+                        <option value="телевизоры">Телевизоры</option>
+                        <option value="холодильники">Холодильники</option>
+                        <option value="другая техника">И другая техника</option>
+                    </select>
+                </div>
+
+                <!-- Название -->
+                <div class="form-group">
+                    <label for="itemName">Название *</label>
+                    <input type="text" id="itemName" required placeholder="Например: Двигатель для стиральной машины LG">
+                </div>
+
+                <!-- Количество -->
+                <div class="form-group">
+                    <label for="itemQuantity">Количество *</label>
+                    <input type="number" id="itemQuantity" required min="0" placeholder="Например: 5">
+                </div>
+
+                <!-- Цена -->
+                <div class="form-group">
+                    <label for="itemPrice">Цена (Br) *</label>
+                    <input type="number" id="itemPrice" required min="0" step="0.01" placeholder="Например: 150.00">
+                </div>
+
+                <!-- Контакт -->
+                <div class="form-group">
+                    <label for="itemPhone">Контакт (телефон или email):</label>
+                    <input type="text" id="itemPhone" placeholder="+375 (XX) XXX-XX-XX или example@email.com">
+                    <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Укажите номер телефона или адрес электронной почты для связи по этому объявлению</small>
+                </div>
+
+                <!-- Описание -->
+                <div class="form-group">
+                    <label for="itemDescription">Описание</label>
+                    <textarea id="itemDescription" rows="4" placeholder="Краткое описание товара (необязательно)"></textarea>
+                </div>
+
+                <!-- Характеристики -->
+                <div class="form-group">
+                    <label for="itemCharacteristics">Технические характеристики</label>
+                    <textarea id="itemCharacteristics" rows="4" placeholder="Например: Мощность: 800W&#10;Напряжение: 220V&#10;Производитель: LG (необязательно)"></textarea>
+                </div>
+
+                <!-- Текущее изображение -->
+                <div class="current-image-section">
+                    <span class="current-image-label">Текущие изображения:</span>
+                    <div id="currentImageContainer"></div>
+                </div>
+
+                <!-- Чекбокс для добавления изображений -->
+                <div class="change-image-checkbox">
+                    <input type="checkbox" id="changeImageCheckbox" onchange="toggleImageUpload()">
+                    <label for="changeImageCheckbox">Добавить новые изображения</label>
+                </div>
+
+                <!-- Секция загрузки изображения (скрыта по умолчанию) -->
+                <div class="image-upload-section" id="imageUploadSection">
+                    <div class="form-group">
+                        <label for="newImage">Новые изображения (можно выбрать несколько)</label>
+                        <div class="image-upload-buttons">
+                            <input type="file" id="newImage" accept="image/*" multiple onchange="handleImageUpload(event)">
+                            <button type="button" class="btn-photo" onclick="openCameraForEdit()">📷 Сделать фото</button>
+                        </div>
+                    </div>
+
+                    <!-- Предпросмотр новых изображений -->
+                    <div id="newImagePreview" style="display: none; margin-top: 15px;">
+                        <span class="current-image-label">Предпросмотр новых изображений:</span>
+                        <div id="newImagesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;"></div>
+                        <button type="button" onclick="removeAllNewImages()" style="margin-top: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer;">Удалить все новые фото</button>
+                    </div>
+                </div>
+
+                <!-- Кнопка сохранения -->
+                <button type="submit" class="btn-add" style="width: 100%; margin-top: 20px;">💾 Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно камеры -->
+    <div id="cameraModal" class="modal" style="display: none;">
+        <div class="camera-modal-content">
+            <h3>📷 Сделать фото</h3>
+            <video id="cameraVideo" autoplay playsinline></video>
+            <canvas id="cameraCanvas" style="display: none;"></canvas>
+            <div class="camera-controls">
+                <button class="btn-camera-action" onclick="capturePhotoForEdit()">📸 Сфотографировать</button>
+                <button class="btn-camera-cancel" onclick="closeCameraModal()">Отмена</button>
+            </div>
+            <div id="cameraError" class="camera-error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="edit-item.js"></script>
+</body>
+</html>
+

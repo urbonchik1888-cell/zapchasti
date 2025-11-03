@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог запчастей для бытовой техники</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>🔧 Запчасти и техника</h1>
+                    <p class="subtitle">Новые и б/у запчасти, б/у техника</p>
+                </div>
+                <div class="user-info">
+                    <span class="username-display" id="usernameDisplay"></span>
+                    <a href="profile.html" class="btn-profile" style="display: none;">👤 Личный кабинет</a>
+                    <button class="btn-logout" onclick="handleLogout()" style="display: none;">Выход</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Навигационная панель -->
+        <div class="tabs">
+            <button class="tab-button" onclick="switchSection('add')" id="addTabButton" style="display: none;">➕ Добавить товар</button>
+            <button class="tab-button active" onclick="switchSection('new')">Новые запчасти</button>
+            <button class="tab-button" onclick="switchSection('used')">Б/У запчасти</button>
+            <button class="tab-button" onclick="switchSection('appliances')">Б/У техника</button>
+        </div>
+
+        <!-- Фильтры по типу техники (общие для всех разделов) -->
+        <div class="appliance-filters">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div class="filters-title">🔍 Фильтр по типу техники:</div>
+                <button class="btn-clear-filter" onclick="clearApplianceFilter()" style="display: none;" id="clearFilterBtn">
+                    ✕ Сбросить фильтр
+                </button>
+            </div>
+            <div class="filters-grid">
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="варочные панели" onchange="applyApplianceFilters()">
+                    <span>Варочные панели</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="духовые шкафы" onchange="applyApplianceFilters()">
+                    <span>Духовые шкафы</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="кофемашины" onchange="applyApplianceFilters()">
+                    <span>Кофемашины</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="кондиционеры" onchange="applyApplianceFilters()">
+                    <span>Кондиционеры</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="посудомоечная машина" onchange="applyApplianceFilters()">
+                    <span>Посудомоечная машина</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="стиральные машины" onchange="applyApplianceFilters()">
+                    <span>Стиральные машины</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="телевизоры" onchange="applyApplianceFilters()">
+                    <span>Телевизоры</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="холодильники" onchange="applyApplianceFilters()">
+                    <span>Холодильники</span>
+                </label>
+                <label class="filter-checkbox">
+                    <input type="radio" name="applianceFilter" value="другая техника" onchange="applyApplianceFilters()">
+                    <span>И другая техника</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Форма добавления -->
+        <div class="add-form" id="addSection" style="display: none;">
+            <h2 id="formTitle">Добавить товар</h2>
+            <p class="section-description">Выберите раздел и заполните форму для добавления нового товара</p>
+            <form id="partForm">
+                <div class="form-group">
+                    <label for="partCategory">Раздел:</label>
+                    <select id="partCategory" required>
+                        <option value="new">Новые запчасти</option>
+                        <option value="used">Б/У запчасти</option>
+                        <option value="appliances">Б/У техника</option>
+                    </select>
+                </div>
+                <div class="form-group" id="applianceTypeGroup">
+                    <label for="applianceType">Категория техники: <span style="color: red;">*</span></label>
+                    <select id="applianceType" required>
+                        <option value="">Выберите категорию техники</option>
+                        <option value="варочные панели">Варочные панели</option>
+                        <option value="духовые шкафы">Духовые шкафы</option>
+                        <option value="кофемашины">Кофемашины</option>
+                        <option value="кондиционеры">Кондиционеры</option>
+                        <option value="посудомоечная машина">Посудомоечная машина</option>
+                        <option value="стиральные машины">Стиральные машины</option>
+                        <option value="телевизоры">Телевизоры</option>
+                        <option value="холодильники">Холодильники</option>
+                        <option value="другая техника">И другая техника</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="partName">Название:</label>
+                        <input type="text" id="partName" required placeholder="Например: Двигатель для стиральной машины">
+                    </div>
+                    <div class="form-group">
+                        <label for="partQuantity">Количество (необязательно):</label>
+                        <input type="number" id="partQuantity" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="partPrice">Цена (Br):</label>
+                        <input type="number" id="partPrice" min="0" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="partPhone">Контакт (телефон или email):</label>
+                    <input type="text" id="partPhone" placeholder="+375 (XX) XXX-XX-XX или example@email.com">
+                    <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Укажите номер телефона или адрес электронной почты для связи по этому объявлению</small>
+                </div>
+                <div class="form-group">
+                    <label for="partDescription">Описание (необязательно):</label>
+                    <textarea id="partDescription" rows="2" placeholder="Краткое описание запчасти"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="partCharacteristics">Характеристики (необязательно):</label>
+                    <textarea id="partCharacteristics" rows="3" placeholder="Например: Мощность: 100W&#10;Напряжение: 220V&#10;Производитель: Samsung"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="partImage">Фотографии (можно выбрать несколько):</label>
+                    <div class="image-upload-controls">
+                        <button type="button" class="btn-photo" onclick="selectFromGallery()">
+                            📁 Выбрать из галереи
+                        </button>
+                        <button type="button" class="btn-photo" onclick="takePhoto()">
+                            📷 Сделать фото
+                        </button>
+                    </div>
+                    <input type="file" id="partImage" accept="image/*" multiple style="display: none;">
+                    <input type="file" id="partImageCamera" accept="image/*" capture="environment" style="display: none;">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <button type="submit" class="btn-add">Добавить запчасть</button>
+            </form>
+        </div>
+
+        <!-- Таблица новых запчастей -->
+        <div id="newPartsSection" class="parts-section" style="display: block;">
+            <div class="section-header">
+                <h2>Новые запчасти</h2>
+                <div class="search-box">
+                    <input type="text" id="searchNew" placeholder="🔍 Поиск по названию..." oninput="searchParts('new')">
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="newPartsTable">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Автор</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="newPartsBody">
+                        <!-- Здесь будут отображаться запчасти -->
+                    </tbody>
+                </table>
+                <div id="newPartsEmpty" class="empty-message">
+                    <p>📦 Пока нет запчастей в этом разделе</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица б/у запчастей -->
+        <div id="usedPartsSection" class="parts-section" style="display: none;">
+            <div class="section-header">
+                <h2>Б/У запчасти</h2>
+                <div class="search-box">
+                    <input type="text" id="searchUsed" placeholder="🔍 Поиск по названию..." oninput="searchParts('used')">
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="usedPartsTable">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Автор</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usedPartsBody">
+                        <!-- Здесь будут отображаться запчасти -->
+                    </tbody>
+                </table>
+                <div id="usedPartsEmpty" class="empty-message">
+                    <p>📦 Пока нет запчастей в этом разделе</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица б/у техники -->
+        <div id="appliancesSection" class="parts-section" style="display: none;">
+            <div class="section-header">
+                <h2>Б/У техника</h2>
+                <div class="search-box">
+                    <input type="text" id="searchAppliances" placeholder="🔍 Поиск по названию..." oninput="searchParts('appliances')">
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="appliancesTable">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Автор</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appliancesBody">
+                        <!-- Здесь будет отображаться техника -->
+                    </tbody>
+                </table>
+                <div id="appliancesEmpty" class="empty-message">
+                    <p>📦 Пока нет техники в этом разделе</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для просмотра изображения -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <!-- Модальное окно для камеры -->
+    <div id="cameraModal" class="modal">
+        <div class="camera-container">
+            <div class="camera-header">
+                <h3>📷 Сделать фото</h3>
+                <button class="close-camera" onclick="closeCameraModal()">✕</button>
+            </div>
+            <div class="camera-body">
+                <video id="cameraStream" autoplay playsinline></video>
+                <canvas id="cameraCanvas" style="display: none;"></canvas>
+            </div>
+            <div class="camera-controls">
+                <button class="btn-camera-action" onclick="capturePhoto()">📸 Сфотографировать</button>
+                <button class="btn-camera-cancel" onclick="closeCameraModal()">Отмена</button>
+            </div>
+            <div id="cameraError" class="camera-error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

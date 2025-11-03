@@ -1,0 +1,989 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+}
+
+header {
+    background: white;
+    color: #2c3e50;
+    padding: 30px 40px;
+    border-bottom: 3px solid #667eea;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.header-title {
+    flex: 1;
+}
+
+header h1 {
+    font-size: 2em;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.subtitle {
+    font-size: 1em;
+    color: #666;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.username-display {
+    font-weight: 600;
+    color: #2c3e50;
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.95em;
+}
+
+.btn-profile {
+    background: #667eea;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s ease;
+}
+
+.btn-profile:hover {
+    background: #5a6fd8;
+}
+
+.btn-logout {
+    background: #dc3545;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-logout:hover {
+    background: #c82333;
+}
+
+.btn-login {
+    background: #007bff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* Вкладки */
+.tabs {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #e1e8ed;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 40px;
+}
+
+.tab-button {
+    flex: 1;
+    min-width: 150px;
+    padding: 15px 20px;
+    background: white;
+    border: 2px solid #667eea;
+    border-bottom: none;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #667eea;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab-button:hover {
+    background: #f8f9fa;
+}
+
+.tab-button.active {
+    background: #667eea;
+    color: white;
+}
+
+/* Форма добавления */
+.add-form {
+    padding: 30px 40px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin: 20px 40px;
+}
+
+.add-form h2 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.section-description {
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 0.95em;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: none;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group textarea {
+    padding: 10px 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    background: white;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: none;
+}
+
+.image-upload-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-photo {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 16px;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 5px;
+    color: #667eea;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-photo:hover {
+    background: #667eea;
+    color: white;
+}
+
+.btn-photo:active {
+    background: #5a6fd8;
+}
+
+.image-preview {
+    margin-top: 15px;
+    display: none;
+    position: relative;
+}
+
+.image-preview.show {
+    display: block;
+}
+
+.image-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-preview .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.image-preview .remove-image:hover {
+    background: #c82333;
+}
+
+.btn-add {
+    background: #667eea;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #5a6fd8;
+}
+
+.btn-add:active {
+    background: #4e5fbd;
+}
+
+/* Кнопки действий */
+.btn-edit {
+    background: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+    margin-right: 5px;
+}
+
+.btn-edit:hover {
+    background: #218838;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+/* Секции с запчастями */
+.parts-section {
+    padding: 20px 40px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin: 20px 40px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: #2c3e50;
+    flex: 1;
+    min-width: 200px;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: none;
+}
+
+.search-box input::placeholder {
+    color: #999;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin: 15px 0;
+}
+
+thead {
+    background: #f2f2f2;
+    color: #333;
+}
+
+thead th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95em;
+    border: 1px solid #ddd;
+}
+
+tbody tr {
+    border: 1px solid #ddd;
+    transition: background 0.2s ease;
+}
+
+tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+tbody tr:hover {
+    background: #e8f4fd;
+}
+
+tbody td {
+    padding: 12px;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.part-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.part-image:hover {
+    transform: scale(1.05);
+}
+
+.no-image {
+    width: 80px;
+    height: 80px;
+    background: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 2em;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 1.1em;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.empty-message p {
+    margin: 0;
+}
+
+/* Модальное окно */
+/* Галерея изображений */
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 2em;
+    padding: 15px 20px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10001;
+    transition: background 0.3s ease;
+    border-radius: 5px;
+}
+
+.gallery-nav:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.gallery-prev {
+    left: 20px;
+}
+
+.gallery-next {
+    right: 20px;
+}
+
+.gallery-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    z-index: 10001;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    animation: zoom 0.3s;
+}
+
+@keyframes zoom {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.close {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+    color: #f1f1f1;
+    font-size: 50px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+}
+
+/* Модальное окно камеры */
+.camera-container {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 50px auto;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.camera-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #667eea;
+    color: white;
+}
+
+.camera-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+}
+
+.close-camera {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2em;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.close-camera:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.camera-body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+#cameraStream {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.btn-camera-action {
+    flex: 2;
+    padding: 12px 25px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-camera-action:hover {
+    background: #5a6fd8;
+}
+
+.btn-camera-action:active {
+    background: #4e5fbd;
+}
+
+.btn-camera-cancel {
+    flex: 1;
+    padding: 12px 25px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-camera-cancel:hover {
+    background: #5a6268;
+}
+
+.camera-error {
+    padding: 15px;
+    background: #f8d7da;
+    color: #721c24;
+    text-align: center;
+    border-top: 1px solid #f5c6cb;
+}
+
+/* Всплывающая карточка с характеристиками */
+.part-details-card {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    max-width: 400px;
+    min-width: 300px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.part-details-header {
+    background: #667eea;
+    color: white;
+    padding: 15px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.part-details-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    flex: 1;
+}
+
+.close-details {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.close-details:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.part-details-content {
+    padding: 15px;
+}
+
+.details-image-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.details-image-container img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9em;
+}
+
+.detail-value {
+    color: #333;
+    font-size: 1em;
+}
+
+.detail-description {
+    margin: 0;
+    color: #666;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.detail-characteristics {
+    margin: 0;
+    color: #333;
+    font-size: 0.9em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #e1e8ed;
+    line-height: 1.6;
+}
+
+/* Адаптивный дизайн */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .subtitle {
+        font-size: 1em;
+    }
+
+    .tab-button {
+        font-size: 1em;
+        padding: 15px 10px;
+        min-width: 150px;
+    }
+
+    .image-upload-controls {
+        flex-direction: column;
+    }
+
+    .btn-photo {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    table {
+        font-size: 0.9em;
+    }
+
+    .part-image,
+    .no-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    thead th,
+    tbody td {
+        padding: 12px 10px;
+    }
+
+    .camera-container {
+        margin: 20px;
+        max-width: calc(100% - 40px);
+    }
+
+    .camera-body {
+        min-height: 300px;
+    }
+
+    .camera-controls {
+        flex-direction: column;
+    }
+
+    .btn-camera-action,
+    .btn-camera-cancel {
+        width: 100%;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .section-header h2 {
+        width: 100%;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* Фильтры по типу техники */
+.appliance-filters {
+    background: linear-gradient(135deg, #f0f4ff 0%, #f8f9fa 100%);
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border: 2px solid #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.filters-title {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1.1em;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+    margin: 0;
+}
+
+.btn-clear-filter {
+    background: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-clear-filter:hover {
+    background: #c82333;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.filter-checkbox:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.filter-checkbox input[type="radio"],
+.filter-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+}
+
+.filter-checkbox input[type="radio"]:checked + span,
+.filter-checkbox input[type="checkbox"]:checked + span {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.filter-checkbox:has(input[type="radio"]:checked),
+.filter-checkbox:has(input[type="checkbox"]:checked) {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

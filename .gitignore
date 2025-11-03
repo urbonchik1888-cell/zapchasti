@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Logs
+*.log
+
+# Node modules (если будет добавлено в будущем)
+node_modules/
+package-lock.json
+
