@@ -370,12 +370,15 @@ async function handleRegister(event) {
     if (ghGetToken()) {
         users.push(newUser);
         await persistUsers(users);
-        showSuccess('Регистрация успешна! Теперь вы можете войти');
-        document.getElementById('registerForm').reset();
-        setTimeout(() => {
-            switchAuthTab('login');
-            document.getElementById('loginUsername').value = username;
-        }, 1500);
+        // Автовход и переход в личный кабинет
+        const session = {
+            userId: newUser.id,
+            username: newUser.username,
+            isAdmin: newUser.isAdmin || false,
+            loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('currentSession', JSON.stringify(session));
+        window.location.href = 'profile.html';
         return;
     }
 
