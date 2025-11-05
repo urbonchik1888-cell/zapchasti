@@ -686,6 +686,18 @@ function renderPartsTable(type, parts, bodyId) {
         // Колонка с действиями (только для авторизованных)
         const actionsCell = document.createElement('td');
         
+        // Проверяем авторизацию через сессию, если currentUser не определён
+        if (!currentUser) {
+            const session = localStorage.getItem('currentSession');
+            if (session) {
+                try {
+                    currentUser = JSON.parse(session);
+                } catch (e) {
+                    currentUser = null;
+                }
+            }
+        }
+        
         if (currentUser) {
             // Кнопка редактирования (только для своих объявлений или администратора)
             if (currentUser.isAdmin || part.userId === currentUser.userId) {
@@ -699,7 +711,8 @@ function renderPartsTable(type, parts, bodyId) {
                 actionsCell.appendChild(editBtn);
             }
             
-            // Кнопка удаления
+            // Кнопка удаления - показываем всем авторизованным пользователям
+            // Проверку прав на удаление делаем в функции deletePart
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn-delete';
             deleteBtn.textContent = 'Удалить';
