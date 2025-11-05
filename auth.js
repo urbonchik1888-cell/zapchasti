@@ -401,6 +401,18 @@ async function handleRegister(event) {
     showSuccess('Открылось письмо администратору. Отправьте его для завершения заявки.');
 }
 
+// Переключение видимости пароля
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        button.textContent = '👁️';
+    }
+}
+
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', async function() {
     await initializeSystem();

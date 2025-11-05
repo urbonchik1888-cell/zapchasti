@@ -249,6 +249,34 @@
             border: 1px solid #f5c6cb;
         }
 
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -331,16 +359,25 @@
                     <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
                         <div class="form-group">
                             <label for="currentPassword">Текущий пароль:</label>
-                            <input type="password" id="currentPassword" required placeholder="Введите текущий пароль">
+                            <div class="password-wrapper">
+                                <input type="password" id="currentPassword" required placeholder="Введите текущий пароль">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword', this)">👁️</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="newPassword">Новый пароль:</label>
-                            <input type="password" id="newPassword" required minlength="4" placeholder="Минимум 4 символа">
+                            <div class="password-wrapper">
+                                <input type="password" id="newPassword" required minlength="4" placeholder="Минимум 4 символа">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword', this)">👁️</button>
+                            </div>
                             <div class="password-hint">Пароль должен содержать минимум 4 символа</div>
                         </div>
                         <div class="form-group">
                             <label for="confirmPassword">Подтвердите новый пароль:</label>
-                            <input type="password" id="confirmPassword" required placeholder="Повторите новый пароль">
+                            <div class="password-wrapper">
+                                <input type="password" id="confirmPassword" required placeholder="Повторите новый пароль">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword', this)">👁️</button>
+                            </div>
                         </div>
                         <button type="submit" class="btn-save">Сохранить пароль</button>
                     </form>

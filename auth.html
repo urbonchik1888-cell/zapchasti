@@ -140,6 +140,34 @@
         .info-box strong {
             color: #667eea;
         }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
     </style>
 </head>
 <body>
@@ -165,7 +193,10 @@
             </div>
             <div class="form-group">
                 <label for="loginPassword">Пароль:</label>
-                <input type="password" id="loginPassword" required placeholder="Введите пароль">
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" required placeholder="Введите пароль">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword', this)">👁️</button>
+                </div>
             </div>
             <button type="submit" class="btn-submit">Войти</button>
         </form>
@@ -178,11 +209,17 @@
             </div>
             <div class="form-group">
                 <label for="registerPassword">Пароль:</label>
-                <input type="password" id="registerPassword" required placeholder="Придумайте пароль" minlength="4">
+                <div class="password-wrapper">
+                    <input type="password" id="registerPassword" required placeholder="Придумайте пароль" minlength="4">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword', this)">👁️</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="registerPasswordConfirm">Подтвердите пароль:</label>
-                <input type="password" id="registerPasswordConfirm" required placeholder="Повторите пароль">
+                <div class="password-wrapper">
+                    <input type="password" id="registerPasswordConfirm" required placeholder="Повторите пароль">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm', this)">👁️</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="registerPhone">Телефон (необязательно):</label>
