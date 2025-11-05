@@ -282,16 +282,18 @@ function capturePhoto() {
         return;
     }
 
-    // Устанавливаем размер canvas равным размеру видео
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Снимаем кадр с видео
+    const srcW = video.videoWidth;
+    const srcH = video.videoHeight;
+    const { targetW, targetH } = getScaledSize(srcW, srcH, 1280, 1280);
 
-    // Рисуем текущий кадр из видео на canvas
+    canvas.width = targetW;
+    canvas.height = targetH;
+
     const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    context.drawImage(video, 0, 0, targetW, targetH);
 
-    // Конвертируем canvas в base64 и добавляем к массиву
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    const imageData = canvas.toDataURL('image/jpeg', 0.7);
     currentImageData.push(imageData);
     
     // Обновляем превью
@@ -362,7 +364,7 @@ function updateImagePreview() {
 }
 
 // Обработка загрузки изображения (несколько файлов)
-function handleImageUpload(event) {
+async function handleImageUpload(event) {
     const files = event.target.files;
     const preview = document.getElementById('imagePreview');
     
@@ -370,23 +372,60 @@ function handleImageUpload(event) {
         return;
     }
     
-    // Обрабатываем каждый файл
-    Array.from(files).forEach((file, fileIndex) => {
-        if (!file.type.match('image.*')) {
-            return;
+    // Обрабатываем каждый файл с компрессией
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.match('image.*')) continue;
+        try {
+            const compressed = await compressImageFile(file, 1280, 1280, 0.7);
+            currentImageData.push(compressed);
+        } catch (e) {
+            console.warn('Не удалось сжать изображение, добавляю оригинал', e);
+            const fallback = await readFileAsDataURL(file);
+            currentImageData.push(fallback);
         }
-        
+    }
+    updateImagePreview();
+}
+
+// Вспомогательные функции сжатия изображений
+function getScaledSize(srcW, srcH, maxW, maxH) {
+    let targetW = srcW;
+    let targetH = srcH;
+    const ratio = Math.min(maxW / srcW, maxH / srcH, 1);
+    targetW = Math.round(srcW * ratio);
+    targetH = Math.round(srcH * ratio);
+    return { targetW, targetH };
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            currentImageData.push(e.target.result);
-            
-            // Обновляем превью после загрузки каждого файла
-            if (fileIndex === files.length - 1) {
-                updateImagePreview();
-            }
-        };
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+async function compressImageFile(file, maxW, maxH, quality) {
+    const dataUrl = await readFileAsDataURL(file);
+    const img = await loadImage(dataUrl);
+    const { targetW, targetH } = getScaledSize(img.naturalWidth || img.width, img.naturalHeight || img.height, maxW, maxH);
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    return canvas.toDataURL('image/jpeg', quality);
 }
 
 // Добавление новой запчасти

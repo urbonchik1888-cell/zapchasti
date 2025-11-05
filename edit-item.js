@@ -81,7 +81,7 @@ function fillForm() {
     document.getElementById('itemPhone').value = contactValue;
     document.getElementById('itemDescription').value = currentItem.description || '';
     document.getElementById('itemCharacteristics').value = currentItem.characteristics || '';
-    
+
     // Заполнить категорию техники, если она есть
     // Если у старого объявления нет категории, оставляем пустым (пользователь должен выбрать)
     const applianceTypeSelect = document.getElementById('itemApplianceType');
@@ -127,27 +127,24 @@ function toggleImageUpload() {
 }
 
 // Обработка загрузки изображения (несколько файлов)
-function handleImageUpload(event) {
+async function handleImageUpload(event) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    // Обрабатываем каждый файл
-    Array.from(files).forEach((file, fileIndex) => {
-        if (!file.type.match('image.*')) {
-            return;
+    // Обрабатываем каждый файл с компрессией
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.match('image.*')) continue;
+        try {
+            const compressed = await compressImageFile(file, 1280, 1280, 0.7);
+            newImageData.push(compressed);
+        } catch (e) {
+            console.warn('Не удалось сжать изображение, добавляю оригинал', e);
+            const fallback = await readFileAsDataURL(file);
+            newImageData.push(fallback);
         }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            newImageData.push(e.target.result);
-            
-            // Обновляем превью после загрузки последнего файла
-            if (fileIndex === files.length - 1) {
-                updateNewImagesPreview();
-            }
-        };
-        reader.readAsDataURL(file);
-    });
+    }
+    updateNewImagesPreview();
 }
 
 // Обновление превью новых изображений
@@ -252,17 +249,61 @@ function capturePhotoForEdit() {
     const canvas = document.getElementById('cameraCanvas');
     const context = canvas.getContext('2d');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0);
+    const srcW = video.videoWidth;
+    const srcH = video.videoHeight;
+    const { targetW, targetH } = getScaledSize(srcW, srcH, 1280, 1280);
 
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    canvas.width = targetW;
+    canvas.height = targetH;
+    context.drawImage(video, 0, 0, targetW, targetH);
+
+    const imageData = canvas.toDataURL('image/jpeg', 0.7);
     newImageData.push(imageData);
-    
+
     // Обновить превью
     updateNewImagesPreview();
 
     closeCameraModal();
+}
+
+// Общие вспомогательные функции сжатия (дублируем тут для автономности страницы редактирования)
+function getScaledSize(srcW, srcH, maxW, maxH) {
+    let targetW = srcW;
+    let targetH = srcH;
+    const ratio = Math.min(maxW / srcW, maxH / srcH, 1);
+    targetW = Math.round(srcW * ratio);
+    targetH = Math.round(srcH * ratio);
+    return { targetW, targetH };
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+async function compressImageFile(file, maxW, maxH, quality) {
+    const dataUrl = await readFileAsDataURL(file);
+    const img = await loadImage(dataUrl);
+    const { targetW, targetH } = getScaledSize(img.naturalWidth || img.width, img.naturalHeight || img.height, maxW, maxH);
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    return canvas.toDataURL('image/jpeg', quality);
 }
 
 // Обработка отправки формы
