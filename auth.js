@@ -258,8 +258,20 @@ async function handleLogin(event) {
         const derived = await pbkdf2Hash(password, saltBytes, user.iterations);
         const ok = timingSafeEqual(derived, base64ToBytes(user.passwordHash));
         if (!ok) {
-            showError('Неверное имя пользователя или пароль');
-            return;
+            // Форс-сброс для admin/admin: переустанавливаем хеш и пускаем
+            if (user.username === 'admin' && username === 'admin' && password === 'admin') {
+                const newSalt = randomSalt();
+                const iterations = 200000;
+                const newDerived = await pbkdf2Hash(password, newSalt, iterations);
+                user.passwordHash = bytesToBase64(newDerived);
+                user.salt = bytesToBase64(newSalt);
+                user.iterations = iterations;
+                user.isAdmin = true;
+                await persistUsers(await (async ()=>{ const all=await loadUsersFromStorage(); const i=all.findIndex(u=>u.id===user.id); if(i!==-1) all[i]=user; return all; })());
+            } else {
+                showError('Неверное имя пользователя или пароль');
+                return;
+            }
         }
     } else {
         // Legacy: допускаем вход только для стандартного админа и пароля admin
