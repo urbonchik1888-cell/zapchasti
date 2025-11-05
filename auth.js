@@ -130,13 +130,21 @@ async function ghSaveRegistrationRequest(request) {
 }
 
 async function loadUsersFromStorage() {
-    // сначала из GitHub
-    const data = await ghLoadAllData();
-    if (data && Array.isArray(data.users) && data.users.length > 0) {
-        return data.users;
+    const local = JSON.parse(localStorage.getItem('users') || '[]');
+    const hasToken = !!ghGetToken();
+    // Без токена всегда предпочитаем локальные (чтобы не блокировать вход админа)
+    if (!hasToken) {
+        if (local.length > 0) return local;
+        const data = await ghLoadAllData();
+        return (data && Array.isArray(data.users)) ? data.users : [];
     }
-    // fallback local, если на GitHub пусто/нет
-    return JSON.parse(localStorage.getItem('users') || '[]');
+    // С токеном: грузим с GitHub и сливаем с локальными, предпочитая локальные записи
+    const data = await ghLoadAllData();
+    const remote = (data && Array.isArray(data.users)) ? data.users : [];
+    const byId = new Map();
+    remote.forEach(u => byId.set(u.id || `u:${u.username}`, u));
+    local.forEach(u => byId.set(u.id || `u:${u.username}`, u));
+    return Array.from(byId.values());
 }
 
 async function persistUsers(users) {
