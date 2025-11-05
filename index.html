@@ -32,14 +32,8 @@
 
         <!-- Фильтры по типу техники (общие для всех разделов) -->
         <div class="appliance-filters">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
-                <div class="filters-title">🔍 Фильтр по типу техники:</div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <button class="filter-toggle" id="filterToggleBtn" onclick="toggleFilterDropdown()">Выбрать категорию ▾</button>
-                    <button class="btn-clear-filter" onclick="clearApplianceFilter()" style="display: none;" id="clearFilterBtn">
-                        ✕ Сбросить фильтр
-                    </button>
-                </div>
+            <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 15px; gap: 10px;">
+                <button class="filter-toggle" id="filterToggleBtn" onclick="toggleFilterDropdown()">Фильтр по типу техники ▾</button>
             </div>
             <div class="filter-dropdown" id="filterDropdown" style="display: none;">
                 <div class="filters-grid">
@@ -79,6 +73,9 @@
                     <input type="radio" name="applianceFilter" value="другая техника" onchange="applyApplianceFilters()">
                     <span>И другая техника</span>
                 </label>
+                </div>
+                <div style="margin-top: 12px; display:flex; justify-content:flex-end;">
+                    <button class="btn-clear-filter" onclick="clearApplianceFilter()" style="display: none;" id="clearFilterBtn">✕ Сбросить фильтр</button>
                 </div>
             </div>
         </div>

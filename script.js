@@ -974,7 +974,7 @@ function updateFilterToggleLabel() {
         const label = selectedRadio.parentElement?.querySelector('span')?.textContent || selectedRadio.value;
         btn.textContent = `${label} ▾`;
     } else {
-        btn.textContent = 'Выбрать категорию ▾';
+        btn.textContent = 'Фильтр по типу техники ▾';
     }
 }
 
