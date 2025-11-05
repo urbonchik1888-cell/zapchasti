@@ -132,10 +132,10 @@ async function ghSaveRegistrationRequest(request) {
 async function loadUsersFromStorage() {
     // сначала из GitHub
     const data = await ghLoadAllData();
-    if (data && Array.isArray(data.users)) {
+    if (data && Array.isArray(data.users) && data.users.length > 0) {
         return data.users;
     }
-    // fallback local
+    // fallback local, если на GitHub пусто/нет
     return JSON.parse(localStorage.getItem('users') || '[]');
 }
 
