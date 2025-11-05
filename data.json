@@ -10,8 +10,8 @@
       "email": "admin@example.com",
       "isAdmin": true,
       "createdAt": "2025-11-05T17:02:09.099Z",
-      "passwordHash": "rPjczMyXVHiOlZE8/aOjayR9X1f2tpfCJ7WDul5iDCk=",
-      "salt": "hg7kIv7Ypsu19QyDBcODlg==",
+      "passwordHash": "1AnrWRnhm2ipJEQ7tXOV9qoCsAObbVBVKt62m3V5Ank=",
+      "salt": "akgRT7Wo9H2ReWJJsYisVQ==",
       "iterations": 200000
     }
   ]
