@@ -6,11 +6,13 @@
     {
       "id": "admin-1762362129099",
       "username": "admin",
-      "password": "legacy-admin",
       "phone": "+375 29 123-45-67",
       "email": "admin@example.com",
       "isAdmin": true,
-      "createdAt": "2025-11-05T17:02:09.099Z"
+      "createdAt": "2025-11-05T17:02:09.099Z",
+      "passwordHash": "rPjczMyXVHiOlZE8/aOjayR9X1f2tpfCJ7WDul5iDCk=",
+      "salt": "hg7kIv7Ypsu19QyDBcODlg==",
+      "iterations": 200000
     }
   ]
 }
