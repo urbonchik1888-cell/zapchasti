@@ -105,6 +105,30 @@ async function ghSaveUsers(users) {
     }
 }
 
+async function ghSaveRegistrationRequest(request) {
+    try {
+        const token = ghGetToken();
+        if (!token) return false;
+        const getRes = await fetch(GH_CONTENTS_URL, { headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } });
+        let sha = null; let current = { newParts: [], usedParts: [], appliances: [], users: [], pendingRegistrations: [] };
+        if (getRes.ok) {
+            const fileData = await getRes.json();
+            sha = fileData.sha;
+            const raw = await ghLoadAllData();
+            if (raw) current = raw;
+        }
+        if (!Array.isArray(current.pendingRegistrations)) current.pendingRegistrations = [];
+        current.pendingRegistrations.push(request);
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2))));
+        const body = { message: 'Add registration request', content, ...(sha && { sha }) };
+        const putRes = await fetch(GH_CONTENTS_URL, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        return putRes.ok;
+    } catch (e) {
+        console.error('Save registration request failed:', e);
+        return false;
+    }
+}
+
 async function loadUsersFromStorage() {
     // сначала из GitHub
     const data = await ghLoadAllData();
@@ -308,17 +332,39 @@ async function handleRegister(event) {
         createdAt: new Date().toISOString()
     };
     
-    users.push(newUser);
-    await persistUsers(users);
-    
-    showSuccess('Регистрация успешна! Теперь вы можете войти');
-    
-    // Очистить форму и переключиться на вход
-    document.getElementById('registerForm').reset();
-    setTimeout(() => {
-        switchAuthTab('login');
-        document.getElementById('loginUsername').value = username;
-    }, 1500);
+    // Если есть токен (админский браузер) — регистрируем сразу, иначе создаём заявку
+    if (ghGetToken()) {
+        users.push(newUser);
+        await persistUsers(users);
+        showSuccess('Регистрация успешна! Теперь вы можете войти');
+        document.getElementById('registerForm').reset();
+        setTimeout(() => {
+            switchAuthTab('login');
+            document.getElementById('loginUsername').value = username;
+        }, 1500);
+        return;
+    }
+
+    // Создаём заявку: сохраняем безопасные данные, пароль не отправляем
+    const request = {
+        id: 'req-' + Date.now(),
+        username,
+        phone,
+        email: email || '',
+        createdAt: new Date().toISOString()
+    };
+    const saved = await ghSaveRegistrationRequest(request);
+    if (saved) {
+        showSuccess('Заявка на регистрацию отправлена администратору. Ожидайте подтверждения.');
+        document.getElementById('registerForm').reset();
+        return;
+    }
+    // Если записать в GitHub нельзя — предлагаем письмо администратору
+    const adminEmail = 'admin@example.com';
+    const subject = encodeURIComponent('Заявка на регистрацию');
+    const body = encodeURIComponent(`Прошу создать аккаунт\n\nЛогин: ${username}\nТелефон: ${phone}\nEmail: ${email || ''}`);
+    window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
+    showSuccess('Открылось письмо администратору. Отправьте его для завершения заявки.');
 }
 
 // Инициализация при загрузке
