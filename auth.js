@@ -342,11 +342,6 @@ async function handleRegister(event) {
         return;
     }
     
-    if (!phone) {
-        showError('Укажите номер телефона');
-        return;
-    }
-    
     // Проверить, не занято ли имя пользователя
     const users = await loadUsersFromStorage();
     
@@ -365,7 +360,7 @@ async function handleRegister(event) {
         passwordHash: bytesToBase64(hashBytes),
         salt: bytesToBase64(salt),
         iterations: iterations,
-        phone: phone,
+        phone: phone || '',
         email: email || '',
         isAdmin: false,
         createdAt: new Date().toISOString()
