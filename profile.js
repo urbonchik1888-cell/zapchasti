@@ -4,6 +4,18 @@ let currentListingsTab = 'all';
 let userNewParts = [];
 let userUsedParts = [];
 let userAppliances = [];
+// --- GitHub storage (users) ---
+const GH_REPO = 'urbonchik1888-cell/zapchasti';
+const GH_FILE = 'data.json';
+const GH_CONTENTS_URL = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const GH_RAW_URL = `https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}`;
+function ghGetToken() { return localStorage.getItem('githubToken'); }
+function ghSetToken(t) { localStorage.setItem('githubToken', t); }
+async function ghRequestTokenIfNeeded() { let t = ghGetToken(); if (t) return t; t = prompt('Для синхронизации пользователей нужен GitHub токен (repo). Вставьте сюда:'); if (t) ghSetToken(t); return t || null; }
+async function ghLoadAllData(){ try{ const r=await fetch(GH_RAW_URL+'?t='+Date.now()); if(!r.ok) throw 0; return await r.json(); }catch(_){ return null; } }
+async function ghSaveUsers(users){ try{ const token=await ghRequestTokenIfNeeded(); if(!token) return false; const getRes=await fetch(GH_CONTENTS_URL,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}}); let sha=null; let current={newParts:[],usedParts:[],appliances:[],users:[]}; if(getRes.ok){ const fd=await getRes.json(); sha=fd.sha; const raw=await ghLoadAllData(); if(raw) current=raw; } current.users=users; const content=btoa(unescape(encodeURIComponent(JSON.stringify(current,null,2)))); const body={message:'Update users',content,...(sha&&{sha})}; const putRes=await fetch(GH_CONTENTS_URL,{method:'PUT',headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)}); return putRes.ok; }catch(e){ console.error('Save users to GitHub failed:',e); return false; }}
+async function loadUsersFromStorage(){ const data=await ghLoadAllData(); if(data&&Array.isArray(data.users)) return data.users; return JSON.parse(localStorage.getItem('users')||'[]'); }
+async function persistUsers(users){ localStorage.setItem('users', JSON.stringify(users)); await ghSaveUsers(users); }
 
 // Крипто-хэширование PBKDF2 (как в auth.js)
 async function pbkdf2Hash(password, saltBytes, iterations = 200000) {
@@ -59,9 +71,9 @@ function loadUserData() {
 }
 
 // Обновление информации профиля
-function updateProfileInfo() {
+async function updateProfileInfo() {
     // Получить данные пользователя из базы
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = await loadUsersFromStorage();
     const userData = users.find(u => u.id === currentUser.userId);
     
     if (!userData) {
@@ -373,7 +385,7 @@ async function handleChangePassword(event) {
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     // Проверить текущий пароль
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = await loadUsersFromStorage();
     const user = users.find(u => u.id === currentUser.userId);
     
     if (!user) { showMessage('Ошибка пользователя', 'error'); return; }
@@ -411,7 +423,7 @@ async function handleChangePassword(event) {
         users[userIndex].salt = bytesToBase64(salt);
         users[userIndex].iterations = iterations;
         delete users[userIndex].password;
-        localStorage.setItem('users', JSON.stringify(users));
+        await persistUsers(users);
     }
     
     // Очистить форму

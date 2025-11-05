@@ -951,7 +951,7 @@ async function saveData() {
         }
     }
     
-    // Сохраняем на GitHub (если есть токен)
+    // Сохраняем на GitHub (если есть токен) — при этом сохраняем существующих users
     try {
         let token = getGitHubToken();
         if (!token) {
@@ -962,8 +962,9 @@ async function saveData() {
             }
         }
         
-        // Получаем текущий SHA файла (если существует)
+        // Получаем текущий файл и sha, чтобы не потерять users
         let sha = null;
+        let current = { users: [], newParts: [], usedParts: [], appliances: [] };
         try {
             const getResponse = await fetch(GITHUB_API_BASE, {
                 headers: {
@@ -974,13 +975,19 @@ async function saveData() {
             if (getResponse.ok) {
                 const fileData = await getResponse.json();
                 sha = fileData.sha;
+                // загрузим текущее содержимое
+                try {
+                    const rawRes = await fetch(GITHUB_RAW_BASE + '?t=' + Date.now());
+                    if (rawRes.ok) {
+                        current = await rawRes.json();
+                    }
+                } catch (_) {}
             }
-        } catch (e) {
-            // Файл не существует, создадим новый
-        }
+        } catch (_) {}
         
         // Подготавливаем данные
         const data = {
+            users: Array.isArray(current.users) ? current.users : [],
             newParts: newParts,
             usedParts: usedParts,
             appliances: appliances

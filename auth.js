@@ -51,9 +51,78 @@ function timingSafeEqual(a, b) {
 }
 
 // Инициализация системы
-function initializeSystem() {
+// --- GitHub storage (users) ---
+const GH_REPO = 'urbonchik1888-cell/zapchasti';
+const GH_FILE = 'data.json';
+const GH_CONTENTS_URL = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const GH_RAW_URL = `https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}`;
+
+function ghGetToken() { return localStorage.getItem('githubToken'); }
+function ghSetToken(t) { localStorage.setItem('githubToken', t); }
+async function ghRequestTokenIfNeeded() {
+    let t = ghGetToken();
+    if (t) return t;
+    t = prompt(
+        'Для синхронизации пользователей нужен GitHub токен (repo).\n' +
+        'Создайте на https://github.com/settings/tokens/new и вставьте сюда:'
+    );
+    if (t) ghSetToken(t);
+    return t || null;
+}
+
+async function ghLoadAllData() {
+    try {
+        const res = await fetch(GH_RAW_URL + '?t=' + Date.now());
+        if (!res.ok) throw new Error('raw not ok');
+        return await res.json();
+    } catch (_) {
+        return null;
+    }
+}
+
+async function ghSaveUsers(users) {
+    try {
+        const token = await ghRequestTokenIfNeeded();
+        if (!token) return false;
+        // 1) получить текущий файл и sha
+        const getRes = await fetch(GH_CONTENTS_URL, { headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } });
+        let sha = null; let current = { newParts: [], usedParts: [], appliances: [], users: [] };
+        if (getRes.ok) {
+            const fileData = await getRes.json();
+            sha = fileData.sha;
+            // загрузить текущее содержимое
+            const raw = await ghLoadAllData();
+            if (raw) current = raw;
+        }
+        current.users = users;
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2))));
+        const body = { message: 'Update users', content, ...(sha && { sha }) };
+        const putRes = await fetch(GH_CONTENTS_URL, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        return putRes.ok;
+    } catch (e) {
+        console.error('Save users to GitHub failed:', e);
+        return false;
+    }
+}
+
+async function loadUsersFromStorage() {
+    // сначала из GitHub
+    const data = await ghLoadAllData();
+    if (data && Array.isArray(data.users)) {
+        return data.users;
+    }
+    // fallback local
+    return JSON.parse(localStorage.getItem('users') || '[]');
+}
+
+async function persistUsers(users) {
+    localStorage.setItem('users', JSON.stringify(users));
+    await ghSaveUsers(users);
+}
+
+async function initializeSystem() {
     // Создать администратора по умолчанию
-    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    let users = await loadUsersFromStorage();
     
     // Проверить, есть ли уже админ
     const adminExists = users.some(u => u.username === 'admin');
@@ -73,7 +142,7 @@ function initializeSystem() {
             isAdmin: true,
             createdAt: new Date().toISOString()
         });
-        localStorage.setItem('users', JSON.stringify(users));
+        await persistUsers(users);
     }
 }
 
@@ -129,7 +198,7 @@ async function handleLogin(event) {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = await loadUsersFromStorage();
     let user = users.find(u => u.username === username);
     
     if (!user) {
@@ -163,7 +232,7 @@ async function handleLogin(event) {
         user.salt = bytesToBase64(salt);
         user.iterations = iterations;
         delete user.password;
-        localStorage.setItem('users', JSON.stringify(users));
+        await persistUsers(users);
     }
     
     if (user) {
@@ -216,7 +285,7 @@ async function handleRegister(event) {
     }
     
     // Проверить, не занято ли имя пользователя
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = await loadUsersFromStorage();
     
     if (users.some(u => u.username === username)) {
         showError('Это имя пользователя уже занято');
@@ -240,7 +309,7 @@ async function handleRegister(event) {
     };
     
     users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
+    await persistUsers(users);
     
     showSuccess('Регистрация успешна! Теперь вы можете войти');
     
