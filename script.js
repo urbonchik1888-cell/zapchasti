@@ -102,11 +102,11 @@ function handleLogout() {
 }
 
 // Загрузка данных при старте
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Проверить авторизацию (необязательно для просмотра)
     const isAuth = checkAuth();
     
-    loadData();
+    await loadData();
     renderParts();
     updateEmptyMessages();
     
@@ -390,7 +390,7 @@ function handleImageUpload(event) {
 }
 
 // Добавление новой запчасти
-function addPart(event) {
+async function addPart(event) {
     event.preventDefault();
     
     // Проверить авторизацию
@@ -473,7 +473,7 @@ function addPart(event) {
     }
     
     // Сохранение и отображение
-    saveData();
+    await saveData();
     renderParts();
     updateEmptyMessages();
     
@@ -498,7 +498,7 @@ function addPart(event) {
 }
 
 // Удаление запчасти/техники
-function deletePart(id, type) {
+async function deletePart(id, type) {
     // Найти запчасть
     let parts;
     if (type === 'new') parts = newParts;
@@ -526,7 +526,7 @@ function deletePart(id, type) {
         appliances = appliances.filter(part => part.id !== id);
     }
     
-    saveData();
+    await saveData();
     renderParts();
     updateEmptyMessages();
     const successMsg = type === 'appliances' ? 'Техника удалена!' : 'Запчасть удалена!';
@@ -820,24 +820,60 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Сохранение данных в localStorage
-function saveData() {
-    try {
-        localStorage.setItem('newParts', JSON.stringify(newParts));
-        localStorage.setItem('usedParts', JSON.stringify(usedParts));
-        localStorage.setItem('appliances', JSON.stringify(appliances));
-    } catch (e) {
-        if (e.name === 'QuotaExceededError') {
-            alert('Превышен лимит хранилища! Возможно, слишком много изображений. Попробуйте удалить старые записи.');
-        } else {
-            console.error('Ошибка сохранения данных:', e);
-        }
-    }
+// Конфигурация GitHub
+const GITHUB_REPO = 'urbonchik1888-cell/zapchasti';
+const GITHUB_FILE = 'data.json';
+const GITHUB_API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/main/' + GITHUB_FILE;
+
+// Получить GitHub токен из localStorage
+function getGitHubToken() {
+    return localStorage.getItem('githubToken');
 }
 
-// Загрузка данных из localStorage
-function loadData() {
+// Сохранить GitHub токен
+function setGitHubToken(token) {
+    localStorage.setItem('githubToken', token);
+}
+
+// Запросить токен у пользователя
+function requestGitHubToken() {
+    return new Promise((resolve) => {
+        const token = prompt(
+            'Для сохранения данных на GitHub нужен Personal Access Token.\n\n' +
+            '1. Создайте токен: https://github.com/settings/tokens/new\n' +
+            '2. Отметьте права: repo (полный доступ к репозиториям)\n' +
+            '3. Вставьте токен ниже:\n\n' +
+            'Токен (начинается с ghp_...):'
+        );
+        if (token) {
+            setGitHubToken(token);
+            resolve(token);
+        } else {
+            resolve(null);
+        }
+    });
+}
+
+// Загрузка данных из GitHub или localStorage
+async function loadData() {
     try {
+        // Сначала пробуем загрузить с GitHub
+        try {
+            const response = await fetch(GITHUB_RAW_BASE + '?t=' + Date.now());
+            if (response.ok) {
+                const data = await response.json();
+                if (data.newParts) newParts = data.newParts;
+                if (data.usedParts) usedParts = data.usedParts;
+                if (data.appliances) appliances = data.appliances;
+                console.log('✅ Данные загружены с GitHub');
+                return;
+            }
+        } catch (e) {
+            console.log('⚠️ Не удалось загрузить с GitHub, используем localStorage:', e);
+        }
+        
+        // Fallback на localStorage
         const savedNewParts = localStorage.getItem('newParts');
         const savedUsedParts = localStorage.getItem('usedParts');
         const savedAppliances = localStorage.getItem('appliances');
@@ -858,6 +894,91 @@ function loadData() {
         newParts = [];
         usedParts = [];
         appliances = [];
+    }
+}
+
+// Сохранение данных в GitHub и localStorage
+async function saveData() {
+    // Всегда сохраняем в localStorage для быстрого доступа
+    try {
+        localStorage.setItem('newParts', JSON.stringify(newParts));
+        localStorage.setItem('usedParts', JSON.stringify(usedParts));
+        localStorage.setItem('appliances', JSON.stringify(appliances));
+    } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            alert('Превышен лимит хранилища! Возможно, слишком много изображений. Попробуйте удалить старые записи.');
+        } else {
+            console.error('Ошибка сохранения в localStorage:', e);
+        }
+    }
+    
+    // Сохраняем на GitHub (если есть токен)
+    try {
+        let token = getGitHubToken();
+        if (!token) {
+            token = await requestGitHubToken();
+            if (!token) {
+                console.log('⚠️ Токен не предоставлен, данные сохранены только локально');
+                return;
+            }
+        }
+        
+        // Получаем текущий SHA файла (если существует)
+        let sha = null;
+        try {
+            const getResponse = await fetch(GITHUB_API_BASE, {
+                headers: {
+                    'Authorization': 'token ' + token,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (getResponse.ok) {
+                const fileData = await getResponse.json();
+                sha = fileData.sha;
+            }
+        } catch (e) {
+            // Файл не существует, создадим новый
+        }
+        
+        // Подготавливаем данные
+        const data = {
+            newParts: newParts,
+            usedParts: usedParts,
+            appliances: appliances
+        };
+        
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        
+        // Отправляем на GitHub
+        const response = await fetch(GITHUB_API_BASE, {
+            method: sha ? 'PUT' : 'POST',
+            headers: {
+                'Authorization': 'token ' + token,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Обновление данных каталога запчастей',
+                content: content,
+                ...(sha && { sha: sha })
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Данные сохранены на GitHub');
+        } else {
+            const error = await response.json();
+            if (error.message && error.message.includes('token')) {
+                // Токен невалидный, просим новый
+                localStorage.removeItem('githubToken');
+                alert('Токен недействителен. Пожалуйста, создайте новый токен.');
+                requestGitHubToken();
+            } else {
+                console.error('Ошибка сохранения на GitHub:', error);
+            }
+        }
+    } catch (e) {
+        console.error('Ошибка сохранения на GitHub:', e);
     }
 }
 
