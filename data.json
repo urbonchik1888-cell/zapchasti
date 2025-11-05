@@ -13,6 +13,26 @@
       "passwordHash": "1AnrWRnhm2ipJEQ7tXOV9qoCsAObbVBVKt62m3V5Ank=",
       "salt": "akgRT7Wo9H2ReWJJsYisVQ==",
       "iterations": 200000
+    },
+    {
+      "id": "admin-1762334604627",
+      "username": "admin",
+      "password": "-qf3of0",
+      "phone": "+375 29 123-45-67",
+      "email": "admin@example.com",
+      "isAdmin": true,
+      "createdAt": "2025-11-05T09:23:24.627Z"
+    },
+    {
+      "id": "user-1762363938141",
+      "username": "Yuri",
+      "passwordHash": "pZ9yRCXYVXLikowyTKItdJd7S3op3QsVPs9XH5seNrg=",
+      "salt": "Z44f0KbkQOMfSm+Aixd+vQ==",
+      "iterations": 200000,
+      "phone": "",
+      "email": "",
+      "isAdmin": false,
+      "createdAt": "2025-11-05T17:32:18.141Z"
     }
   ]
 }
