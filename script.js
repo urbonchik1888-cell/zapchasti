@@ -138,6 +138,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('partImage').addEventListener('change', handleImageUpload);
     document.getElementById('partImageCamera').addEventListener('change', handleImageUpload);
     
+    // Закрытие дропдауна фильтра по клику вне
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('filterDropdown');
+        const toggleBtn = document.getElementById('filterToggleBtn');
+        if (!dropdown || !toggleBtn) return;
+        const clickedInside = dropdown.contains(e.target) || toggleBtn.contains(e.target);
+        if (!clickedInside) dropdown.style.display = 'none';
+    });
+    
+    // Установить метку на кнопке фильтра если уже выбран
+    updateFilterToggleLabel();
 });
 
 // Переключение разделов навигации
@@ -925,6 +936,11 @@ function applyApplianceFilters() {
         clearBtn.style.display = selectedRadio ? 'inline-block' : 'none';
     }
     
+    // Обновить подпись на кнопке и скрыть дропдаун
+    updateFilterToggleLabel();
+    const dropdown = document.getElementById('filterDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+    
     // Если фильтр не выбран, просто показываем текущий раздел
     if (!selectedRadio) {
         // Применяем обычный поиск в текущем разделе
@@ -940,6 +956,26 @@ function applyApplianceFilters() {
     
     // Применяем фильтры ко всем разделам
     applyFiltersToAllSections();
+}
+
+// Переключить показ дропдауна фильтра
+function toggleFilterDropdown() {
+    const dropdown = document.getElementById('filterDropdown');
+    if (!dropdown) return;
+    dropdown.style.display = dropdown.style.display === 'none' || dropdown.style.display === '' ? 'block' : 'none';
+}
+
+// Обновить текст на кнопке фильтра
+function updateFilterToggleLabel() {
+    const btn = document.getElementById('filterToggleBtn');
+    if (!btn) return;
+    const selectedRadio = document.querySelector('.appliance-filters input[type="radio"]:checked');
+    if (selectedRadio) {
+        const label = selectedRadio.parentElement?.querySelector('span')?.textContent || selectedRadio.value;
+        btn.textContent = `${label} ▾`;
+    } else {
+        btn.textContent = 'Выбрать категорию ▾';
+    }
 }
 
 // Применение фильтров ко всем разделам
@@ -986,6 +1022,8 @@ function clearApplianceFilter() {
         selectedRadio.checked = false;
         applyApplianceFilters();
     }
+    // Сбросить подпись и показать дропдаун кнопку
+    updateFilterToggleLabel();
 }
 
 // Фильтрация техники по выбранным типам
