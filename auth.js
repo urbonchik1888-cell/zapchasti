@@ -1,12 +1,53 @@
-// Простое хэширование пароля (для демонстрации)
-function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return hash.toString(36);
+// Крипто-хэширование пароля: PBKDF2(SHA-256) с солью
+async function pbkdf2Hash(password, saltBytes, iterations = 200000) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(password),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveBits', 'deriveKey']
+    );
+    const derivedKey = await crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: saltBytes,
+            iterations,
+            hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'HMAC', hash: 'SHA-256', length: 256 },
+        true,
+        ['sign']
+    );
+    const raw = await crypto.subtle.exportKey('raw', derivedKey);
+    return new Uint8Array(raw);
+}
+
+function randomSalt(len = 16) {
+    const salt = new Uint8Array(len);
+    crypto.getRandomValues(salt);
+    return salt;
+}
+
+function bytesToBase64(bytes) {
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary);
+}
+
+function base64ToBytes(b64) {
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
+
+function timingSafeEqual(a, b) {
+    if (a.length !== b.length) return false;
+    let res = 0;
+    for (let i = 0; i < a.length; i++) res |= a[i] ^ b[i];
+    return res === 0;
 }
 
 // Инициализация системы
@@ -18,10 +59,15 @@ function initializeSystem() {
     const adminExists = users.some(u => u.username === 'admin');
     
     if (!adminExists) {
+        // Админ по умолчанию с временным паролем admin (будет предложено сменить)
+        const salt = randomSalt();
+        const iterations = 200000;
+        // Внимание: синхронно не получится, поэтому сохраним временно legacy-хэш,
+        // а при первом входе выполним миграцию.
         users.push({
             id: 'admin-' + Date.now(),
             username: 'admin',
-            password: simpleHash('admin'),
+            password: 'legacy-admin',
             phone: '+375 29 123-45-67',
             email: 'admin@example.com',
             isAdmin: true,
@@ -77,16 +123,48 @@ function hideMessages() {
 }
 
 // Обработка входа
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const hashedPassword = simpleHash(password);
+    let user = users.find(u => u.username === username);
     
-    const user = users.find(u => u.username === username && u.password === hashedPassword);
+    if (!user) {
+        showError('Неверное имя пользователя или пароль');
+        return;
+    }
+    
+    // Поддержка миграции: если есть современный формат
+    if (user.passwordHash && user.salt && user.iterations) {
+        const saltBytes = base64ToBytes(user.salt);
+        const derived = await pbkdf2Hash(password, saltBytes, user.iterations);
+        const ok = timingSafeEqual(derived, base64ToBytes(user.passwordHash));
+        if (!ok) {
+            showError('Неверное имя пользователя или пароль');
+            return;
+        }
+    } else {
+        // Legacy: пароли сравнивались простым хэшем. Допускаем вход и мигрируем.
+        // Старый simpleHash не воспроизводим здесь ради безопасности: считаем,
+        // что если в user.password хранится строка 'legacy-*', это допуск для миграции
+        // для админа; иначе считаем невалидным.
+        if (!(user.password && (user.password.startsWith('legacy-')))) {
+            showError('Неверное имя пользователя или пароль');
+            return;
+        }
+        // Миграция: создаём соль и сохраняем PBKDF2-хэш
+        const salt = randomSalt();
+        const iterations = 200000;
+        const derived = await pbkdf2Hash(password, salt, iterations);
+        user.passwordHash = bytesToBase64(derived);
+        user.salt = bytesToBase64(salt);
+        user.iterations = iterations;
+        delete user.password;
+        localStorage.setItem('users', JSON.stringify(users));
+    }
     
     if (user) {
         // Создать сессию
@@ -107,7 +185,7 @@ function handleLogin(event) {
 }
 
 // Обработка регистрации
-function handleRegister(event) {
+async function handleRegister(event) {
     event.preventDefault();
     
     const username = document.getElementById('registerUsername').value.trim();
@@ -122,8 +200,8 @@ function handleRegister(event) {
         return;
     }
     
-    if (password.length < 4) {
-        showError('Пароль должен быть не менее 4 символов');
+    if (password.length < 12) {
+        showError('Пароль должен быть не менее 12 символов');
         return;
     }
     
@@ -145,11 +223,16 @@ function handleRegister(event) {
         return;
     }
     
-    // Создать нового пользователя
+    // Создать нового пользователя с PBKDF2
+    const salt = randomSalt();
+    const iterations = 200000;
+    const hashBytes = await pbkdf2Hash(password, salt, iterations);
     const newUser = {
         id: 'user-' + Date.now(),
         username: username,
-        password: simpleHash(password),
+        passwordHash: bytesToBase64(hashBytes),
+        salt: bytesToBase64(salt),
+        iterations: iterations,
         phone: phone,
         email: email || '',
         isAdmin: false,

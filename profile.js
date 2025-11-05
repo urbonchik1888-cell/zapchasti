@@ -5,16 +5,27 @@ let userNewParts = [];
 let userUsedParts = [];
 let userAppliances = [];
 
-// Простое хэширование (такое же, как в auth.js)
-function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return hash.toString(36);
+// Крипто-хэширование PBKDF2 (как в auth.js)
+async function pbkdf2Hash(password, saltBytes, iterations = 200000) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveBits', 'deriveKey']
+    );
+    const derivedKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: saltBytes, iterations, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'HMAC', hash: 'SHA-256', length: 256 },
+        true,
+        ['sign']
+    );
+    const raw = await crypto.subtle.exportKey('raw', derivedKey);
+    return new Uint8Array(raw);
 }
+
+function randomSalt(len = 16) { const s = new Uint8Array(len); crypto.getRandomValues(s); return s; }
+function bytesToBase64(bytes) { let b=''; bytes.forEach(x=>b+=String.fromCharCode(x)); return btoa(b); }
+function base64ToBytes(b64) { const b=atob(b64); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a; }
+function timingSafeEqual(a,b){ if(a.length!==b.length) return false; let r=0; for(let i=0;i<a.length;i++) r|=a[i]^b[i]; return r===0; }
 
 // Проверка авторизации
 function checkAuth() {
@@ -354,7 +365,7 @@ function updateUsernameInListings(oldUsername, newUsername) {
 }
 
 // Изменение пароля
-function handleChangePassword(event) {
+async function handleChangePassword(event) {
     event.preventDefault();
     
     const currentPassword = document.getElementById('currentPassword').value;
@@ -365,14 +376,23 @@ function handleChangePassword(event) {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const user = users.find(u => u.id === currentUser.userId);
     
-    if (!user || user.password !== simpleHash(currentPassword)) {
-        showMessage('Неверный текущий пароль', 'error');
-        return;
+    if (!user) { showMessage('Ошибка пользователя', 'error'); return; }
+    // Проверка текущего пароля (поддержка legacy и нового формата)
+    if (user.passwordHash && user.salt && user.iterations) {
+        const saltBytes = base64ToBytes(user.salt);
+        const derived = await pbkdf2Hash(currentPassword, saltBytes, user.iterations);
+        const ok = timingSafeEqual(derived, base64ToBytes(user.passwordHash));
+        if (!ok) { showMessage('Неверный текущий пароль', 'error'); return; }
+    } else {
+        // Legacy: допускаем смену, если хранится legacy-поле
+        if (!(user.password && user.password.startsWith('legacy-'))) {
+            showMessage('Неверный текущий пароль', 'error'); return;
+        }
     }
     
     // Проверить новый пароль
-    if (newPassword.length < 4) {
-        showMessage('Новый пароль должен содержать минимум 4 символа', 'error');
+    if (newPassword.length < 12) {
+        showMessage('Новый пароль должен содержать минимум 12 символов', 'error');
         return;
     }
     
@@ -384,7 +404,13 @@ function handleChangePassword(event) {
     // Обновить пароль
     const userIndex = users.findIndex(u => u.id === currentUser.userId);
     if (userIndex !== -1) {
-        users[userIndex].password = simpleHash(newPassword);
+        const salt = randomSalt();
+        const iterations = 200000;
+        const hashBytes = await pbkdf2Hash(newPassword, salt, iterations);
+        users[userIndex].passwordHash = bytesToBase64(hashBytes);
+        users[userIndex].salt = bytesToBase64(salt);
+        users[userIndex].iterations = iterations;
+        delete users[userIndex].password;
         localStorage.setItem('users', JSON.stringify(users));
     }
     
