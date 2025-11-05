@@ -1,5 +1,16 @@
 {
   "newParts": [],
   "usedParts": [],
-  "appliances": []
+  "appliances": [],
+  "users": [
+    {
+      "id": "admin-1762362129099",
+      "username": "admin",
+      "password": "legacy-admin",
+      "phone": "+375 29 123-45-67",
+      "email": "admin@example.com",
+      "isAdmin": true,
+      "createdAt": "2025-11-05T17:02:09.099Z"
+    }
+  ]
 }
