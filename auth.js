@@ -226,8 +226,30 @@ async function handleLogin(event) {
     let user = users.find(u => u.username === username);
     
     if (!user) {
-        showError('Неверное имя пользователя или пароль');
-        return;
+        // Фолбэк: если это стандартный админ (admin/admin), создадим и войдём
+        if (username === 'admin' && password === 'admin') {
+            const salt = randomSalt();
+            const iterations = 200000;
+            const derived = await pbkdf2Hash(password, salt, iterations);
+            const newAdmin = {
+                id: 'admin-' + Date.now(),
+                username: 'admin',
+                passwordHash: bytesToBase64(derived),
+                salt: bytesToBase64(salt),
+                iterations,
+                phone: '+375 29 123-45-67',
+                email: 'admin@example.com',
+                isAdmin: true,
+                createdAt: new Date().toISOString()
+            };
+            const usersAll = await loadUsersFromStorage();
+            usersAll.push(newAdmin);
+            await persistUsers(usersAll);
+            user = newAdmin;
+        } else {
+            showError('Неверное имя пользователя или пароль');
+            return;
+        }
     }
     
     // Поддержка миграции: если есть современный формат
@@ -240,11 +262,8 @@ async function handleLogin(event) {
             return;
         }
     } else {
-        // Legacy: пароли сравнивались простым хэшем. Допускаем вход и мигрируем.
-        // Старый simpleHash не воспроизводим здесь ради безопасности: считаем,
-        // что если в user.password хранится строка 'legacy-*', это допуск для миграции
-        // для админа; иначе считаем невалидным.
-        if (!(user.password && (user.password.startsWith('legacy-')))) {
+        // Legacy: допускаем вход только для стандартного админа и пароля admin
+        if (!(user.password && user.password.startsWith('legacy-') && user.username === 'admin' && password === 'admin')) {
             showError('Неверное имя пользователя или пароль');
             return;
         }
@@ -368,7 +387,7 @@ async function handleRegister(event) {
 }
 
 // Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    initializeSystem();
+document.addEventListener('DOMContentLoaded', async function() {
+    await initializeSystem();
 });
 
