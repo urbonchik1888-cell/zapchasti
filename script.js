@@ -590,6 +590,7 @@ function renderPartsTable(type, parts, bodyId) {
     tbody.innerHTML = '';
     
     if (parts.length === 0) {
+        toggleMobileCards(type, []);
         return;
     }
     
@@ -732,6 +733,56 @@ function renderPartsTable(type, parts, bodyId) {
         
         tbody.appendChild(row);
     });
+    // Также обновляем мобильные карточки
+    toggleMobileCards(type, parts);
+}
+
+// Создание карточек для мобильной версии
+function toggleMobileCards(type, parts) {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    const tableEl = type === 'new' ? document.getElementById('newPartsTable')
+        : type === 'used' ? document.getElementById('usedPartsTable')
+        : document.getElementById('appliancesTable');
+    const cardsEl = type === 'new' ? document.getElementById('newPartsCards')
+        : type === 'used' ? document.getElementById('usedPartsCards')
+        : document.getElementById('appliancesCards');
+    if (!tableEl || !cardsEl) return;
+    if (isMobile) {
+        tableEl.classList.add('mobile-hidden');
+        cardsEl.style.display = 'grid';
+        cardsEl.innerHTML = parts.map(p => createPartCardHtml(p, type)).join('');
+    } else {
+        tableEl.classList.remove('mobile-hidden');
+        cardsEl.style.display = 'none';
+        cardsEl.innerHTML = '';
+    }
+}
+
+function createPartCardHtml(part, type) {
+    const images = part.images && Array.isArray(part.images) && part.images.length > 0
+        ? part.images : (part.image ? [part.image] : []);
+    const imgSrc = images.length ? images[0] : '';
+    const imgHtml = imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(part.name)}" onclick="openItemDetail(${part.id}, '${type}')">` : `<div class="no-image" style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;background:#e9ecef;border-radius:8px;">📷</div>`;
+    const quantityHtml = (type === 'new' && (!currentUser || !currentUser.isAdmin))
+        ? (part.quantity > 0 ? '<span style="color:#28a745;font-weight:600;">✅ Есть в наличии</span>' : '<span style="color:#dc3545;font-weight:600;">❌ Нет в наличии</span>')
+        : `<span>Кол-во: ${part.quantity}</span>`;
+    const canEdit = currentUser && (currentUser.isAdmin || part.userId === currentUser.userId);
+    const editBtn = canEdit ? `<button class="btn-edit" onclick="event.stopPropagation(); openItemEdit(${part.id}, '${type}')">Редактировать</button>` : '';
+    const deleteBtn = currentUser ? `<button class="btn-delete" onclick="event.stopPropagation(); deletePart(${part.id}, '${type}')">Удалить</button>` : '';
+    return `
+    <div class="part-card" onclick="openItemDetail(${part.id}, '${type}')">
+        ${imgHtml}
+        <div>
+            <div class="part-card-title">${escapeHtml(part.name)}</div>
+            <div class="part-card-price">${Number(part.price).toFixed(2)} Br</div>
+            <div class="part-card-meta">${quantityHtml} • Автор: ${escapeHtml(part.username || 'Неизвестно')}</div>
+            <div class="part-card-actions">${editBtn} ${deleteBtn}</div>
+        </div>
+    </div>`;
+}
+
+function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
 }
 
 // Обновление сообщений о пустых таблицах
@@ -1303,7 +1354,9 @@ function updateSearchResults(type, filteredCount, totalCount) {
             emptyDiv.innerHTML = '<p>🔍 Ничего не найдено по вашему запросу</p>';
         }
     } else {
-        tableElement.style.display = 'table';
+        // На мобильном используем карточки, таблицу оставляем скрытой классом
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        tableElement.style.display = isMobile ? 'none' : 'table';
         emptyDiv.style.display = 'none';
     }
 }

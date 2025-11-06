@@ -903,6 +903,64 @@ tbody td {
 }
 
 /* Фильтры по типу техники */
+/* Карточки для мобильной версии */
+@media (max-width: 768px) {
+    .cards-container {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .part-card {
+        background: white;
+        border: 1px solid #e1e8ed;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .part-card img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .part-card-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 6px;
+    }
+
+    .part-card-meta {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 6px;
+    }
+
+    .part-card-price {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+
+    .part-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Прячем таблицы на мобильном при наличии карточек */
+    .table-container table.mobile-hidden {
+        display: none !important;
+    }
+}
 .appliance-filters {
     background: linear-gradient(135deg, #f0f4ff 0%, #f8f9fa 100%);
     padding: 25px;
