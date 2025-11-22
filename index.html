@@ -18,6 +18,7 @@
                 <button id="loginBtn" class="auth-btn">Войти</button>
                 <button id="registerBtn" class="auth-btn">Регистрация</button>
                 <button id="addPartBtn" class="add-btn" style="display: none;">+ Добавить запчасть</button>
+                <button id="syncBtn" class="sync-btn" onclick="clearAllData()" title="Очистить все данные">🔄</button>
                 <div id="userInfo" style="display: none;">
                     <span id="userName"></span>
                     <button id="profileBtn" class="auth-btn">Личный кабинет</button>
@@ -283,6 +284,16 @@
         </div>
     </div>
 
+    <script>
+        // Функция для очистки всех данных
+        function clearAllData() {
+            if (confirm('Вы уверены, что хотите очистить все данные? Это удалит все объявления и пользователей.')) {
+                localStorage.clear();
+                alert('Все данные очищены. Страница будет перезагружена.');
+                window.location.reload();
+            }
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

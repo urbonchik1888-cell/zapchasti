@@ -801,3 +801,19 @@ main {
         height: 40px;
     }
 }
+
+.sync-btn {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background 0.3s;
+}
+
+.sync-btn:hover {
+    background: #ff5252;
+}
