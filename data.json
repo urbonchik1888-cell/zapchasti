@@ -88,5 +88,9 @@
       "email": "",
       "applianceType": "холодильники"
     }
-  ]
+  ],
+  "testEntry": {
+    "timestamp": "2025-11-22T20:02:43.220Z",
+    "message": "Test entry from GitHub API test"
+  }
 }
