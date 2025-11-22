@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог запчастей</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🔧 Каталог запчастей</h1>
+        <div class="header-controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Поиск запчастей..." class="search-input">
+                <button id="searchBtn" class="search-btn">🔍</button>
+            </div>
+            <div class="auth-controls">
+                <button id="loginBtn" class="auth-btn">Войти</button>
+                <button id="registerBtn" class="auth-btn">Регистрация</button>
+                <button id="addPartBtn" class="add-btn" style="display: none;">+ Добавить запчасть</button>
+                <div id="userInfo" style="display: none;">
+                    <span id="userName"></span>
+                    <button id="profileBtn" class="auth-btn">Личный кабинет</button>
+                    <button id="logoutBtn" class="auth-btn">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="categories">
+        <div class="category-dropdown">
+            <button class="category-btn active dropdown-toggle" data-category="all">
+                Все запчасти <span class="dropdown-arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="applianceDropdown">
+                <a href="#" class="dropdown-item" data-appliance="all">🔍 Все запчасти</a>
+                <a href="#" class="dropdown-item" data-appliance="refrigerator">🧊 Холодильники</a>
+                <a href="#" class="dropdown-item" data-appliance="dishwasher">🍽️ Посудомоечные машины</a>
+                <a href="#" class="dropdown-item" data-appliance="airconditioner">❄️ Кондиционеры</a>
+                <a href="#" class="dropdown-item" data-appliance="oven">🔥 Духовые шкафы</a>
+                <a href="#" class="dropdown-item" data-appliance="washingmachine">🌀 Стиральные машины</a>
+                <a href="#" class="dropdown-item" data-appliance="cooktop">🔥 Варочные панели</a>
+                <a href="#" class="dropdown-item" data-appliance="coffeemachine">☕ Кофемашины</a>
+                <a href="#" class="dropdown-item" data-appliance="tv">📺 Телевизоры</a>
+                <a href="#" class="dropdown-item" data-appliance="other">📦 Прочее</a>
+            </div>
+        </div>
+        <button class="category-btn" data-category="new">Новые запчасти</button>
+        <button class="category-btn" data-category="used">БУ запчасти</button>
+        <button class="category-btn" data-category="equipment">БУ техника</button>
+    </nav>
+
+    <main>
+        <div id="partsGrid" class="parts-grid">
+            <!-- Запчасти будут добавляться через JavaScript -->
+        </div>
+    </main>
+
+    <!-- Модальное окно для добавления запчасти -->
+    <div id="addPartModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Добавить запчасть</h2>
+            <form id="addPartForm">
+                <div class="form-group">
+                    <label for="partName">Название запчасти:</label>
+                    <input type="text" id="partName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partCategory">Категория:</label>
+                    <select id="partCategory" required>
+                        <option value="new">Новые запчасти</option>
+                        <option value="used">БУ запчасти</option>
+                        <option value="equipment">БУ техника</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partAppliance">Тип техники:</label>
+                    <select id="partAppliance">
+                        <option value="">Не указано</option>
+                        <option value="refrigerator">🧊 Холодильники</option>
+                        <option value="dishwasher">🍽️ Посудомоечные машины</option>
+                        <option value="airconditioner">❄️ Кондиционеры</option>
+                        <option value="oven">🔥 Духовые шкафы</option>
+                        <option value="washingmachine">🌀 Стиральные машины</option>
+                        <option value="cooktop">🔥 Варочные панели</option>
+                        <option value="coffeemachine">☕ Кофемашины</option>
+                        <option value="tv">📺 Телевизоры</option>
+                        <option value="other">📦 Прочее</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partPrice">Цена (бел. руб.):</label>
+                    <input type="number" id="partPrice" min="0" required>
+                </div>
+                
+                <div class="form-group" id="quantityGroup" style="display: none;">
+                    <label for="partQuantity">Количество (шт.):</label>
+                    <input type="number" id="partQuantity" min="1" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Контактная информация:</label>
+                    <div class="contact-type-selector">
+                        <label>
+                            <input type="radio" name="contactType" value="phone" checked>
+                            Телефон
+                        </label>
+                        <label>
+                            <input type="radio" name="contactType" value="email">
+                            Email
+                        </label>
+                        <label>
+                            <input type="radio" name="contactType" value="telegram">
+                            Telegram
+                        </label>
+                    </div>
+                    <input type="tel" id="partPhone" placeholder="+375 (XX) XXX-XX-XX" required>
+                    <input type="email" id="partEmail" placeholder="email@example.com" style="display: none;">
+                    <input type="text" id="partTelegram" placeholder="@username" style="display: none;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="partDescription">Описание:</label>
+                    <textarea id="partDescription" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partImages">Фотографии:</label>
+                    <div class="image-upload-container">
+                        <div class="file-input-section">
+                            <input type="file" id="partImages" accept="image/*" multiple>
+                            <button type="button" id="cameraBtn" class="camera-btn">📷 Камера</button>
+                        </div>
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Добавить запчасть</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно авторизации -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="authForms">
+                <div id="loginForm" class="auth-form">
+                    <h2>Вход</h2>
+                    <form id="loginFormElement">
+                        <div class="form-group">
+                            <label for="loginEmail">Email:</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Пароль:</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Войти</button>
+                    </form>
+                    <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
+                </div>
+                
+                <div id="registerForm" class="auth-form" style="display: none;">
+                    <h2>Регистрация</h2>
+                    <form id="registerFormElement">
+                        <div class="form-group">
+                            <label for="registerName">Имя:</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Пароль:</label>
+                            <input type="password" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPhone">Телефон:</label>
+                            <input type="tel" id="registerPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        <button type="submit" class="submit-btn">Зарегистрироваться</button>
+                    </form>
+                    <p>Есть аккаунт? <a href="#" id="showLogin">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно личного кабинета -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content profile-modal">
+            <span class="close">&times;</span>
+            <h2>Личный кабинет</h2>
+            
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="info">Информация</button>
+                <button class="tab-btn" data-tab="parts">Мои объявления</button>
+                <button class="tab-btn" data-tab="password">Изменить пароль</button>
+            </div>
+
+            <div class="tab-content">
+                <div id="infoTab" class="tab-pane active">
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Имя:</label>
+                            <span id="profileName"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="profileEmail"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Телефон:</label>
+                            <span id="profilePhone"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Роль:</label>
+                            <span id="profileRole"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Дата регистрации:</label>
+                            <span id="profileDate"></span>
+                        </div>
+                        <div class="profile-actions">
+                            <button id="editProfileBtn" class="submit-btn" style="margin-top: 15px;">Редактировать информацию</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="partsTab" class="tab-pane">
+                    <div id="userPartsList" class="user-parts-list">
+                        <!-- Объявления пользователя будут добавлены через JavaScript -->
+                    </div>
+                </div>
+
+                <div id="passwordTab" class="tab-pane">
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Текущий пароль:</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Новый пароль:</label>
+                            <input type="password" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Подтвердите пароль:</label>
+                            <input type="password" id="confirmPassword" required minlength="6">
+                        </div>
+                        <button type="submit" class="submit-btn">Изменить пароль</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования профиля -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Редактировать профиль</h2>
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editName">Имя:</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Телефон:</label>
+                    <input type="tel" id="editPhone" placeholder="+375 (XX) XXX-XX-XX">
+                </div>
+                <button type="submit" class="submit-btn">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
