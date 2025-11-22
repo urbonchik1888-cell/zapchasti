@@ -92,5 +92,13 @@
   "testEntry": {
     "timestamp": "2025-11-22T20:22:27.117Z",
     "message": "Test entry from GitHub API test"
-  }
+  },
+  "testEntries": [
+    {
+      "timestamp": "2025-11-22T20:52:32.851Z",
+      "device": "MacBook",
+      "message": "Test entry from GitHub API test page",
+      "testId": "w2y32f"
+    }
+  ]
 }
