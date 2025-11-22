@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Каталог запчастей</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .profile-header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .profile-role {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-settings-toggle {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-settings-toggle:hover {
+            background: #5568d3;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        .profile-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .settings-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .settings-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #218838;
+        }
+
+        .user-stats {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .user-listings-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .listings-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .listings-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .listings-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .listings-content {
+            display: none;
+        }
+
+        .listings-content.active {
+            display: block;
+        }
+
+        .no-listings {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .password-hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                text-align: center;
+            }
+
+            .profile-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Шапка профиля -->
+        <div class="profile-header">
+            <div class="profile-info">
+                <h1 class="profile-title">👤 Личный кабинет</h1>
+                <div id="profileUserInfo"></div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn-settings-toggle" onclick="toggleSettings()">⚙️ Настройки аккаунта</button>
+                <a href="index.html" class="btn-back">← Вернуться в каталог</a>
+                <button class="btn-logout" onclick="handleLogout()">Выход</button>
+            </div>
+        </div>
+
+        <!-- Секции профиля -->
+        <div class="profile-sections">
+            <!-- Настройки -->
+            <div class="settings-section" id="settingsSection" style="display: none;">
+                <h2 class="section-title">⚙️ Настройки аккаунта</h2>
+
+                <div id="settingsMessages"></div>
+
+                <!-- Форма изменения логина -->
+                <div class="settings-form">
+                    <h3>Изменить логин</h3>
+                    <form id="changeUsernameForm" onsubmit="handleChangeUsername(event)">
+                        <div class="form-group">
+                            <label for="currentUsername">Текущий логин:</label>
+                            <input type="text" id="currentUsername" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUsername">Новый логин:</label>
+                            <input type="text" id="newUsername" required minlength="3" placeholder="Минимум 3 символа">
+                        </div>
+                        <button type="submit" class="btn-save">Сохранить логин</button>
+                    </form>
+                </div>
+
+                <!-- Форма изменения пароля -->
+                <div class="settings-form">
+                    <h3>Изменить пароль</h3>
+                    <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                        <div class="form-group">
+                            <label for="currentPassword">Текущий пароль:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="currentPassword" required placeholder="Введите текущий пароль">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword', this)">👁️</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Новый пароль:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="newPassword" required minlength="4" placeholder="Минимум 4 символа">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword', this)">👁️</button>
+                            </div>
+                            <div class="password-hint">Пароль должен содержать минимум 4 символа</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Подтвердите новый пароль:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="confirmPassword" required placeholder="Повторите новый пароль">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword', this)">👁️</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save">Сохранить пароль</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Мои объявления -->
+        <div class="user-listings-section">
+            <h2 class="section-title">📦 Мои объявления</h2>
+
+            <div class="listings-tabs">
+                <button class="listings-tab active" onclick="switchListingsTab('all')">
+                    Все (<span id="countAll">0</span>)
+                </button>
+                <button class="listings-tab" onclick="switchListingsTab('new')">
+                    Новые запчасти (<span id="countNew">0</span>)
+                </button>
+                <button class="listings-tab" onclick="switchListingsTab('used')">
+                    Б/У запчасти (<span id="countUsed">0</span>)
+                </button>
+                <button class="listings-tab" onclick="switchListingsTab('appliances')">
+                    Б/У техника (<span id="countAppliances">0</span>)
+                </button>
+            </div>
+
+            <!-- Контент вкладок -->
+            <div id="listingsAll" class="listings-content active">
+                <table class="parts-table">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Раздел</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Дата добавления</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listingsAllBody"></tbody>
+                </table>
+                <div id="noListingsAll" class="no-listings" style="display: none;">
+                    У вас пока нет объявлений
+                </div>
+            </div>
+
+            <div id="listingsNew" class="listings-content">
+                <table class="parts-table">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Дата добавления</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listingsNewBody"></tbody>
+                </table>
+                <div id="noListingsNew" class="no-listings" style="display: none;">
+                    У вас нет объявлений в этом разделе
+                </div>
+            </div>
+
+            <div id="listingsUsed" class="listings-content">
+                <table class="parts-table">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Дата добавления</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listingsUsedBody"></tbody>
+                </table>
+                <div id="noListingsUsed" class="no-listings" style="display: none;">
+                    У вас нет объявлений в этом разделе
+                </div>
+            </div>
+
+            <div id="listingsAppliances" class="listings-content">
+                <table class="parts-table">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена (Br)</th>
+                            <th>Дата добавления</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listingsAppliancesBody"></tbody>
+                </table>
+                <div id="noListingsAppliances" class="no-listings" style="display: none;">
+                    У вас нет объявлений в этом разделе
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для просмотра изображения -->
+    <div id="imageModal" class="modal" onclick="closeImageModal()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>
+
